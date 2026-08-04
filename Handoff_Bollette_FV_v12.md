@@ -237,3 +237,31 @@ dei tre commit locali (v10, v11, v12) su GitHub.
 bolletta Sorgenia luglio; (3) opzionale — completare i dati meteo per il resto di luglio e
 per agosto se utile ad affinare la correlazione; (4) completare produzione FV agosto; (5)
 rigenerare token GitHub.*
+
+---
+
+## ADDENDUM (stesso giorno, dopo v12) — Cadenza di fatturazione Sorgenia confermata
+
+L'utente ha confermato un dettaglio operativo importante: **Sorgenia fattura mensilmente**
+(una bolletta per ogni mese solare di consumo), a differenza di Plenitude che fatturava a
+bimestre. Le due bollette Sorgenia ricevute finora (maggio, giugno) sono ciascuna per un
+singolo mese — non bimestrali.
+
+**Pattern di emissione osservato:**
+
+| Periodo fatturato | Data emissione | Ritardo |
+|---|---|---|
+| Maggio 2026 | 18/06/2026 | ~18 giorni dopo fine mese |
+| Giugno 2026 | 16/07/2026 | ~16 giorni dopo fine mese |
+
+**Aspettativa per la prossima bolletta:** copre il **periodo luglio 2026** (non un
+bimestre luglio-agosto), con emissione stimata verso **metà agosto 2026**, seguendo lo
+stesso pattern di ~16-18 giorni di ritardo rispetto alla fine del mese di competenza.
+
+Questa regola va tenuta a mente per non aspettarsi erroneamente una fattura cumulativa o
+per non sollecitare prematuramente una bolletta che, per pattern storico, non è ancora
+matura per l'emissione.
+
+**Nessun nuovo dato da inserire nel DB** in questo addendum — le due bollette citate erano
+già presenti (`real_sorgenia_2026_mag`, `real_sorgenia_2026_giu`). Aggiunta solo una voce
+in `cronologia_eventi` (categoria `fornitore`) per tracciare la conferma della cadenza.
