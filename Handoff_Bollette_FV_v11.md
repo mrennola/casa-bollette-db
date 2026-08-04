@@ -1,5 +1,5 @@
 # Handoff — Analisi consumi elettrici, fotovoltaico e bollette
-## Versione 11 — aggiornata al 04/08/2026
+## Versione 11 — aggiornata al 04/08/2026 (con causa luglio chiarita)
 
 **Data:** 2026-08-04
 **Tipo:** handoff / continuità
@@ -10,10 +10,11 @@
 2. **Dati Tapo di luglio e agosto arrivati** (mai disponibili prima, sempre "da esportare"):
    file `Consumo_di_Energia.xls` con fogli Anno/Mese/Giorno. Bias Tapo-vs-inverter
    riconfermato stabilissimo: **8,20% medio su 87 giorni** (era 8,20% su 52 — invariato).
-3. **⚠️ Scoperta rilevante da verificare**: il prelievo rete di **luglio 2026 (597,45 kWh)
-   è quasi il doppio di giugno** e **superiore anche a luglio 2025 pre-FV (468 kWh)** —
-   pattern distribuito su tutto il mese, non un'anomalia isolata. Causa non accertata.
-   Vedi §7.
+3. **Prelievo di luglio molto più alto (597,45 kWh) — CAUSA CHIARITA**: l'utente ha
+   confermato uso intensivo di due impianti di climatizzazione durante l'ondata di caldo di
+   luglio (split 12000 BTU salone + multisplit 3 unità camere). Verifica di plausibilità
+   effettuata (§7) — ordine di grandezza coerente. Non è un'anomalia tecnica di impianto o
+   di misura, ma un fattore comportamentale/stagionale nuovo da tracciare nel progetto.
 4. Chiusura **preliminare** di luglio in `riconciliazione_mensile` (in attesa della bolletta
    Sorgenia di luglio per la chiusura definitiva).
 
@@ -157,9 +158,9 @@ Immissione luglio 2026    = 3,31 kWh
 
 ---
 
-## 7. NOVITÀ v11 — ⚠️ Anomalia da verificare: prelievo luglio molto alto
+## 7. Prelievo luglio molto alto — CAUSA CHIARITA DALL'UTENTE
 
-Il dato è **sorprendente** e va segnalato con enfasi:
+Il dato iniziale era sorprendente:
 
 | Mese | Prelievo rete |
 |---|---:|
@@ -173,20 +174,39 @@ dell'anno precedente pre-fotovoltaico** (+27,7%) — un risultato che rovescia i
 osservato in tutti i mesi precedenti (dove il FV riduceva sempre il prelievo vs anno
 precedente).
 
-**Verifica already fatta:** non è un artefatto di un singolo giorno anomalo — l'aumento è
-distribuito su tutto il mese (giorni di picco: 16/07 = 30,94 kWh, 31/07 = 29,82 kWh, contro
+**Verifica tecnica effettuata:** non è un artefatto di un singolo giorno anomalo — l'aumento
+è distribuito su tutto il mese (giorni di picco: 16/07 = 30,94 kWh, 31/07 = 29,82 kWh, contro
 un picco di giugno di 25,36 kWh il 27/06). Nessuna singola ora anomala rilevata (max singola
-lettura oraria 3,7 kWh, plausibile).
+lettura oraria 3,7 kWh, plausibile). **Esclusa quindi una causa tecnica/di misura.**
 
-**Ipotesi possibili (non verificate, da chiedere all'utente):**
-- Ondata di caldo a luglio → maggior uso di condizionatori/ventilatori
-- Maggior uso della pompa piscina (es. programma esteso, controlavaggio filtro più frequente)
-- Ospiti/maggiore occupazione della casa (periodo estivo, vacanze)
-- Nuovo elettrodomestico o carico non ancora censito nella cronologia tecnica
+### Causa confermata dall'utente (04/08/2026)
 
-**Non è stata fatta alcuna assunzione:** il dato è riportato così come emerge dai sensori,
-senza attribuzione di causa. **Da chiarire con l'utente nella prossima sessione**, anche
-perché incide molto sulla chiusura contabile di luglio (§8).
+Uso intensivo di due impianti di climatizzazione durante l'ondata di caldo di luglio:
+- **Split monozona 12.000 BTU** per il salone — il più usato
+- **Multisplit** (un motore esterno, 3 unità interne) per le 3 camere da letto
+
+### Verifica di plausibilità (stima, non misura)
+
+```
+Extra prelievo luglio vs giugno = 597,45 - 339,92 = 257,53 kWh su 31 giorni
+                                 = 8,31 kWh/giorno
+
+Potenza elettrica stimata (salone 12000 BTU inverter ~1,15 kW + multisplit ~1,8 kW) ≈ 3,0 kW
+Ore/giorno equivalenti a pieno carico combinato per spiegare il delta ≈ 2,8 h/giorno
+```
+
+**Lettura:** ~2,8 ore/giorno a pieno carico combinato (o più ore a carico parziale, tipico
+per unità inverter che modulano) è pienamente plausibile per un luglio caldo a Roma con uso
+pomeridiano/serale del condizionamento. **Ordine di grandezza coerente**, causa accettata
+come spiegazione primaria.
+
+**Nota metodologica:** questa non è una misura diretta (non c'è uno smart plug dedicato sui
+condizionatori), ma una verifica di plausibilità aritmetica. La causa resta "riportata
+dall'utente, verificata per ordine di grandezza" — non "misurata direttamente" — coerente
+con lo standard di rigore del progetto sulla provenienza dei dati.
+
+**Nuovo evento in `cronologia_eventi`:** aggiunta voce categoria `climatizzazione` per
+tracciare questo fattore stagionale, utile per confronti futuri (es. agosto, o luglio 2027).
 
 ---
 
@@ -211,11 +231,15 @@ Consumo reale casa (Inverter) = 597,45 + 137,92 - 3,31  = 732,06 kWh
 | Prelievo rete | 468 kWh | 597,45 kWh | **+27,7%** |
 | Consumo reale casa | 468 kWh | 721,92-732,06 kWh | **+54,3%/+56,4%** |
 
-**Lettura preliminare (da confermare):** a differenza di maggio e giugno, a luglio il
-fotovoltaico **non basta a compensare** l'aumento del carico — sia il prelievo sia il
-consumo reale crescono sensibilmente rispetto all'anno precedente. Questo è un'inversione
-di tendenza rispetto al pattern consolidato in tutte le versioni precedenti del progetto e
-merita approfondimento prima di essere consolidato come conclusione.
+**Lettura preliminare (causa ora chiarita, §7):** a differenza di maggio e giugno, a luglio
+il fotovoltaico **non basta a compensare** l'aumento del carico — sia il prelievo sia il
+consumo reale crescono sensibilmente rispetto all'anno precedente. Questo è un'inversione di
+tendenza rispetto al pattern consolidato nel progetto, ma **non indica un problema
+nell'impianto FV o nelle misure**: è spiegata dall'uso intensivo di climatizzazione durante
+l'ondata di caldo (verificato per plausibilità in §7). Il fotovoltaico continua a produrre
+regolarmente (127,78-137,92 kWh, in linea con giugno), semplicemente il carico aggiuntivo
+(condizionatori) è troppo grande per essere assorbito interamente dall'autoconsumo diurno
+disponibile (impianto piccolo, 800 Wp, senza accumulo).
 
 **Nota sul dato di confronto luglio 2025:** i 468 kWh derivano da uno split mensile
 riportato nelle note della bolletta Plenitude Lug-Ago 2025 (fonte esterna, non dal PDF
@@ -271,7 +295,7 @@ luglio (127,776975 kWh esatto).
 
 | Dato mancante | Fonte | Urgenza | Note |
 |---|---|---|---|
-| **Chiarire il prelievo anomalo di luglio** | Utente (ipotesi da verificare) | **Alta** | Vedi §7 — incide sulla chiusura contabile |
+| ~~Chiarire il prelievo anomalo di luglio~~ | Utente | ~~Alta~~ | **RISOLTO (v11)** — causa: climatizzazione intensiva, vedi §7 |
 | Bolletta Sorgenia **luglio 2026** | Sorgenia | **Alta** | Necessaria per chiusura definitiva (attualmente solo preliminare) |
 | Produzione FV **agosto 2026** — completare | Tapo + inverter | Media | Solo 4/31 giorni |
 | Push di questa sessione (v10+v11) su GitHub | — | **Alta** | **In attesa del token** — commit locale non ancora pushato |
@@ -279,10 +303,9 @@ luglio (127,776975 kWh esatto).
 | Decisione: promuovere inverter a fonte primaria? | — | Media | In sospeso da v5 |
 | Rigenerare token GitHub | — | Consigliata | Riutilizzato in molte sessioni |
 
-**Azione a più alto impatto per la prossima sessione:** chiarire con l'utente la causa
-dell'aumento di prelievo a luglio (§7) — è il primo mese in cui il pattern "FV riduce sempre
-il prelievo vs anno precedente" si rompe, e va capito prima di trarre conclusioni definitive
-sul progetto.
+**Azione a più alto impatto per la prossima sessione:** ingest della bolletta Sorgenia di
+luglio appena disponibile, per trasformare la chiusura preliminare in definitiva (come già
+fatto per giugno in v10).
 
 ---
 
@@ -317,13 +340,14 @@ Giugno 2026 → 344,5 kWh (bolletta ufficiale)
 Riduzione   → -95,5 kWh (-21,7%)
 ```
 
-**Luglio 2026 introduce un'anomalia da chiarire:** il prelievo (597,45 kWh, dato Sonoff
-completo) è superiore sia a giugno sia a luglio 2025 pre-fotovoltaico. Il consumo reale
-della casa (fonte inverter) sale del +56% rispetto a luglio 2025. Questo è il primo mese del
-progetto in cui il pattern positivo del FV non è sufficiente a mantenere il prelievo sotto
-il livello dell'anno precedente. La causa non è accertata (nessuna anomalia tecnica nei
-dati, l'aumento è distribuito su tutto il mese) — **da chiarire con l'utente** prima di
-consolidare questa lettura.
+**Luglio 2026 rompe il pattern positivo, ma con causa nota:** il prelievo (597,45 kWh, dato
+Sonoff completo) è superiore sia a giugno sia a luglio 2025 pre-fotovoltaico. Il consumo
+reale della casa (fonte inverter) sale del +56% rispetto a luglio 2025. Questo è il primo
+mese del progetto in cui il FV non basta a mantenere il prelievo sotto il livello dell'anno
+precedente — **causa chiarita**: uso intensivo di climatizzazione (split salone 12000 BTU +
+multisplit 3 camere) durante l'ondata di caldo, verificato per plausibilità (§7). Non
+riflette un problema di impianto o di misura, ma un nuovo pattern stagionale/comportamentale
+da tenere presente nei confronti futuri (es. agosto, o luglio dell'anno prossimo).
 
 La chiusura di giugno (piscina) resta **definitiva e solida**: +5,1%/+7,4% consumo reale,
 -21,7% prelievo rete, versione v10 basata su bolletta ufficiale.
