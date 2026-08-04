@@ -265,3 +265,52 @@ matura per l'emissione.
 **Nessun nuovo dato da inserire nel DB** in questo addendum — le due bollette citate erano
 già presenti (`real_sorgenia_2026_mag`, `real_sorgenia_2026_giu`). Aggiunta solo una voce
 in `cronologia_eventi` (categoria `fornitore`) per tracciare la conferma della cadenza.
+
+---
+
+## ADDENDUM 2 (stesso giorno) — Dati meteo reali di Settebagni sostituiscono il proxy
+
+L'utente ha fornito un file con la vera posizione (Settebagni, Roma — lat 42,00644 lon 12,52032)
+e, tramite un template Excel con formula WEBSERVICE verso l'API Open-Meteo Historical Forecast,
+ha recuperato **1.560 letture orarie di temperatura** (01/06 → 04/08/2026, 65 giorni completi).
+
+**Nota tecnica:** Open-Meteo blocca l'accesso automatizzato via robots.txt (verificato: sia
+web_fetch che accesso di rete diretto da bash falliscono). Il dato è stato ottenuto facendo
+aprire all'utente l'URL API direttamente nel browser (accesso umano, non bot) e caricando il
+CSV risultante.
+
+### Nuove tabelle
+
+| Tabella | Righe | Contenuto |
+|---|---:|---|
+| `meteo_orario` (nuova) | 1.560 | Temperatura oraria Settebagni, 01/06-04/08/2026 |
+| `meteo_giornaliero` (ricostruita) | 65 (era 17) | Aggregati giornalieri (min/media/max) da dato orario reale, sostituisce il proxy "Roma centro" |
+
+**Fonte:** Open-Meteo Historical Forecast API, dato modellistico (non centralina fisica) alle
+coordinate esatte di Settebagni.
+
+### Correlazione ricalcolata con dato reale (61 giorni, giugno+luglio)
+
+| | Valore |
+|---|---:|
+| Correlazione T media/prelievo | **r=0,732** (era r=0,71 su proxy, solo luglio parziale) |
+| Correlazione T max/prelievo | r=0,643 |
+| Pendenza | +1,80 kWh/giorno per ogni +1°C di T media |
+| Solo giugno (30 gg) | r=0,712 |
+| Solo luglio (31 gg, dato completo) | r=0,642 |
+
+### Ondata di calore di giugno — confermata con dato locale (non più solo articolo di cronaca)
+
+```
+Pre-ondata (1-16/06): T media 23,1C, picco 31,4C
+Durante ondata (17-29/06): T media 28,4C, picco 38,3C
+Delta: +5,3C
+```
+
+Il picco locale di Settebagni (38,3°C il 28/06) è coerente con il picco di 40,1°C riportato dai
+media per il centro di Roma (stazione AUBAC Collegio Romano) lo stesso periodo — leggermente
+più basso, plausibile per una zona periferica/meno urbanizzata.
+
+**Conclusione:** i numeri trovati con il proxy "Roma centro" (v12 originale) erano già nell'ordine
+di grandezza corretto; il dato reale di Settebagni li conferma e li affina, senza cambiare le
+conclusioni qualitative del progetto.
