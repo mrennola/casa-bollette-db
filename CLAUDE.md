@@ -31,6 +31,18 @@ dal lato utente non ha risolto in modo affidabile/immediato.
 nel frattempo il collegamento GitHub dell'utente è stato attivato, il push diretto
 funzionerà e si può saltare il giro manuale via GitHub Desktop.
 
+## Recupero dati meteo (Open-Meteo): usare il browser, non shell/WebFetch
+
+Il dominio `api.open-meteo.com` (e `archive-api.open-meteo.com`) non è raggiungibile né dallo
+shell (bloccato dal proxy di rete di sessione, fuori allowlist) né dal tool WebFetch (robots.txt
+disallow su tutto il dominio, errore `ROBOTS_DISALLOWED`). L'unica via che ha funzionato
+(sessione 29/09/2026): navigare direttamente con il browser (Claude in Chrome, tool
+`mcp__claude-in-chrome__navigate` + `get_page_text`) sull'URL dell'API (es.
+`https://api.open-meteo.com/v1/forecast?latitude=...&longitude=...&start_date=...&end_date=...&daily=...&timezone=Europe%2FRome`),
+che restituisce il JSON grezzo leggibile con `get_page_text`. Tenere gli URL brevi (pochi parametri
+`daily` per chiamata) per evitare l'errore "url exceeds the maximum fetchable length" del proxy.
+Coordinate di riferimento già usate: lat 42.006, lon 12.520 (Settebagni, Roma).
+
 ## Convenzioni di progetto (vedi anche i vari Handoff_Bollette_FV_v*.md)
 
 - Token GitHub sempre fornito come file `token.txt`, mai incollato in chiaro nel testo.
